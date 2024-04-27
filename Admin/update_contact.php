@@ -1,0 +1,104 @@
+<?php 
+include '../includes/connect.php';
+
+// Initialize variables to store existing data
+$id = '';
+$email = '';
+$phone = '';
+$work = '';
+
+// Check if ID parameter is provided
+if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['id'])) {
+    // Retrieve the ID from the URL
+    $id = $_GET['id'];
+
+    // Fetch existing data from the database based on ID
+    $sql = "SELECT * FROM contact WHERE id = '$id'";
+    $result = $conn->query($sql);
+
+    // Check if record exists
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        // Assign existing data to variables
+        $email = $row['email'];
+        $phone = $row['phone'];
+        $work = $row['work'];
+    } else {
+        echo "Record not found.";
+        exit();
+    }
+}
+
+// Check if form is submitted for update
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Retrieve updated form data
+    $id = isset($_POST['id']) ? $_POST['id'] : '';
+    $updated_email = isset($_POST['email']) ? $_POST['email'] : '';
+    $updated_phone = isset($_POST['phone']) ? $_POST['phone'] : '';
+    $updated_work = isset($_POST['work']) ? $_POST['work'] : '';
+
+    // Update record in the database
+    $sql_update = "UPDATE contact SET email='$updated_email', phone='$updated_phone', work='$updated_work' WHERE id='$id'";
+    if ($conn->query($sql_update) === TRUE) {
+        echo "Record updated successfully.";
+        header("location:contact.php");
+    } else {
+        echo "Error updating record: " . $conn->error;
+    }
+
+    // Close database connection
+    $conn->close();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Contact Data</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<?php include '../includes/admin.php'; ?>
+<div class="container">
+  <h2>Update Contact Data</h2>
+  <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+    <!-- Hidden input field to store ID -->
+    <input type="hidden" name="id" value="<?php echo $id; ?>">
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" class="form-control" id="email" name="email" value="<?php echo $email; ?>" required>
+    </div>
+    <div class="form-group">
+      <label for="phone">Phone:</label>
+      <input type="text" class="form-control" id="phone" name="phone" value="<?php echo $phone; ?>" required>
+    </div>
+    <div class="form-group">
+      <label for="work">Work:</label>
+      <input type="text" class="form-control" id="work" name="work" value="<?php echo $work; ?>" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+</div>
+
+</body>
+</html>
+
+<style>
+  .container{
+    position: relative;
+    margin: 0px auto;
+    width: 700px;
+    padding: 20px;
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    top: 10%;
+    left: 500%;
+  }
+</style>
